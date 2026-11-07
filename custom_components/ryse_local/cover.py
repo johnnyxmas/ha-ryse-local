@@ -35,8 +35,11 @@ async def async_setup_entry(
 class RyseShade(CoordinatorEntity[RyseCoordinator], CoverEntity):
     """A single RYSE shade.
 
-    Position convention matches Home Assistant: 100 = fully open, 0 = closed.
-    The bridge reports and accepts the same 0-100 scale.
+    Position conventions are INVERTED between the two systems:
+      * Bridge: 0 = fully open, 100 = fully closed.
+      * Home Assistant cover: 100 = fully open, 0 = closed.
+    So HA position = 100 - bridge position, and vice versa.
+    (Confirmed against physical shades 2026-11-07: open shades report 0.)
     """
 
     _attr_has_entity_name = True
@@ -77,26 +80,28 @@ class RyseShade(CoordinatorEntity[RyseCoordinator], CoverEntity):
     @property
     def current_cover_position(self) -> int | None:
         gear = self._gear
-        return gear.position if gear else None
+        return 100 - gear.position if gear else None
 
     @property
     def is_closed(self) -> bool | None:
         gear = self._gear
         if gear is None:
             return None
-        return gear.position == 0
+        return gear.position == 100
 
     async def async_open_cover(self, **kwargs: Any) -> None:
-        await self._set(100)
+        await self._set_ha(100)
 
     async def async_close_cover(self, **kwargs: Any) -> None:
-        await self._set(0)
+        await self._set_ha(0)
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
-        await self._set(int(kwargs[ATTR_POSITION]))
+        await self._set_ha(int(kwargs[ATTR_POSITION]))
 
-    async def _set(self, position: int) -> None:
-        await self.coordinator.client.async_set_position(self._gear_id, position)
+    async def _set_ha(self, ha_position: int) -> None:
+        """Set from a Home Assistant position (100=open); bridge wants the inverse."""
+        bridge_position = 100 - max(0, min(100, ha_position))
+        await self.coordinator.client.async_set_position(self._gear_id, bridge_position)
         # The motor takes several seconds; refresh so the UI tracks it.
         await self.coordinator.async_request_refresh()
 
