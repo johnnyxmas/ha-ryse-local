@@ -67,6 +67,27 @@ any other IoT device: keep it on a trusted network segment / IoT VLAN. If RYSE
 ships a firmware that requires the serial as a credential, set it in the
 integration's **Serial** field.
 
+## Icon / branding
+
+This integration's icon and logo are **not** shipped in this repository. Home
+Assistant serves integration brand images from the shared
+[`home-assistant/brands`](https://github.com/home-assistant/brands) repository,
+keyed by the integration's domain. The images for this integration live at:
+
+```
+custom_integrations/ryse_local/{icon,logo}.png
+```
+
+Once that brands entry is merged, Home Assistant and HACS display it
+automatically — there is nothing to reference from here beyond the matching
+`domain: ryse_local` in `manifest.json`.
+
+The logo is a RYSE trademark, used only to identify the RYSE product this
+integration controls. It is hosted in `home-assistant/brands` (where it remains
+the property of its owner) and is deliberately **not** bundled in this
+MIT-licensed repository.
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Covers the integration code only, not the RYSE name
+or logo.
