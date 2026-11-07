@@ -67,6 +67,54 @@ any other IoT device: keep it on a trusted network segment / IoT VLAN. If RYSE
 ships a firmware that requires the serial as a credential, set it in the
 integration's **Serial** field.
 
+## Examples: quick-set presets
+
+The shades expose position, so presets like "open / half / closed" are a couple
+of small scripts plus a dashboard card — kept here as examples rather than built
+into the integration, so you choose the positions and which shades they cover.
+
+`scripts.yaml` (replace the entity list with your own shade entities):
+
+```yaml
+shades_open_all:
+  alias: Shades - open all
+  sequence:
+    - action: cover.set_cover_position
+      target:
+        entity_id: [cover.living_room_2, cover.living_room_3, cover.living_room_4, cover.living_room_5]
+      data: {position: 100}
+shades_half_all:
+  alias: Shades - half open
+  sequence:
+    - action: cover.set_cover_position
+      target:
+        entity_id: [cover.living_room_2, cover.living_room_3, cover.living_room_4, cover.living_room_5]
+      data: {position: 50}
+shades_close_all:
+  alias: Shades - close all
+  sequence:
+    - action: cover.set_cover_position
+      target:
+        entity_id: [cover.living_room_2, cover.living_room_3, cover.living_room_4, cover.living_room_5]
+      data: {position: 0}
+```
+
+A row of buttons for a dashboard view:
+
+```yaml
+type: horizontal-stack
+cards:
+  - type: button
+    name: Open
+    tap_action: {action: perform-action, perform_action: script.shades_open_all}
+  - type: button
+    name: Half
+    tap_action: {action: perform-action, perform_action: script.shades_half_all}
+  - type: button
+    name: Closed
+    tap_action: {action: perform-action, perform_action: script.shades_close_all}
+```
+
 ## Icon / branding
 
 This integration's icon and logo are **not** shipped in this repository. Home
