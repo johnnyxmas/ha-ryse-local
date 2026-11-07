@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "RYSE SmartBridge (local)",
+        "description": "Connect to the SmartBridge on your LAN. The serial number is only needed if you have turned on the bridge's local security option.",
+        "data": {
+          "host": "Bridge IP address",
+          "serial": "Serial number (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach the bridge at that address."
+    },
+    "abort": {
+      "already_configured": "This bridge is already set up."
+    }
+  }
+}
