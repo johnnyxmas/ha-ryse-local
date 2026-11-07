@@ -6,3 +6,8 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .DS_Store
+
+# Brand images live in home-assistant/brands, never here
+*.png
+*.svg
+*.ico
