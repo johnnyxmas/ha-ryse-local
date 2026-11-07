@@ -117,23 +117,15 @@ cards:
 
 ## Icon / branding
 
-This integration's icon and logo are **not** shipped in this repository. Home
-Assistant serves integration brand images from the shared
-[`home-assistant/brands`](https://github.com/home-assistant/brands) repository,
-keyed by the integration's domain. The images for this integration live at:
+Brand images ship in [`custom_components/ryse_local/brand/`](custom_components/ryse_local/brand/)
+(`icon.png`, `logo.png`). Since Home Assistant 2026.3, custom integrations serve
+their own brand images from this `brand/` folder through the brands proxy
+(`/api/brands/integration/ryse_local/…`) — local images take priority over the
+CDN, with no registration and no entry in `home-assistant/brands` required.
 
-```
-custom_integrations/ryse_local/{icon,logo}.png
-```
-
-Once that brands entry is merged, Home Assistant and HACS display it
-automatically — there is nothing to reference from here beyond the matching
-`domain: ryse_local` in `manifest.json`.
-
-The logo is a RYSE trademark, used only to identify the RYSE product this
-integration controls. It is hosted in `home-assistant/brands` (where it remains
-the property of its owner) and is deliberately **not** bundled in this
-MIT-licensed repository.
+The images are a **RYSE trademark**, included only to identify the RYSE product
+this integration controls. They are **not** covered by this repository's MIT
+license — see [`custom_components/ryse_local/brand/NOTICE`](custom_components/ryse_local/brand/NOTICE).
 
 ## License
 

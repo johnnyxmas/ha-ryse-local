@@ -1,0 +1,7 @@
+The image files in this directory (icon.png, logo.png) are the RYSE logo,
+a trademark of its owner. They are included here solely to identify the RYSE
+product this integration controls, using Home Assistant's integration-branding
+mechanism (the `brand/` folder, HA 2026.3+).
+
+These images are NOT licensed under this repository's MIT license and are not
+the project's to relicense. All rights remain with the trademark owner.
