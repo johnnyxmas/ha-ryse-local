@@ -16,5 +16,28 @@
     "abort": {
       "already_configured": "This bridge is already set up."
     }
+  },
+  "entity": {
+    "number": {
+      "speed": {
+        "name": "Speed"
+      }
+    },
+    "switch": {
+      "obstacle_detection": {
+        "name": "Obstacle detection"
+      }
+    },
+    "sensor": {
+      "power_source": {
+        "name": "Power source",
+        "state": {
+          "battery": "Battery",
+          "ac_adapter": "AC adapter",
+          "usb_charger": "USB charger",
+          "unknown": "Unknown"
+        }
+      }
+    }
   }
 }

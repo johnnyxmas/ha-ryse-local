@@ -10,20 +10,32 @@ import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
-from pyryse import Gear, RyseBridge, RyseError
+from pyryse import Device, Gear, RyseBridge, RyseError
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import CONF_HOST, CONF_SERIAL, REQUEST_TIMEOUT, SCAN_INTERVAL_SECONDS
+from .const import (
+    CONF_HOST,
+    CONF_SERIAL,
+    DOMAIN,
+    REQUEST_TIMEOUT,
+    SCAN_INTERVAL_SECONDS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.COVER, Platform.SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.COVER,
+    Platform.NUMBER,
+    Platform.SENSOR,
+    Platform.SWITCH,
+]
 
 
 class RyseCoordinator(DataUpdateCoordinator[dict[str, Gear]]):
@@ -37,12 +49,15 @@ class RyseCoordinator(DataUpdateCoordinator[dict[str, Gear]]):
             update_interval=timedelta(seconds=SCAN_INTERVAL_SECONDS),
         )
         self.bridge = bridge
+        #: The bridge as last reported (identity, firmware, gears).
+        self.device: Device | None = None
 
     async def _async_update_data(self) -> dict[str, Gear]:
         try:
             device = await self.bridge.async_get_device()
         except RyseError as err:
             raise UpdateFailed(str(err)) from err
+        self.device = device
         return {gear.id: gear for gear in device.gears}
 
 
@@ -52,6 +67,8 @@ class RyseRuntimeData:
 
     coordinator: RyseCoordinator
     bridge: RyseBridge
+    #: Device-registry id of the bridge; shades hang off it.
+    bridge_device_id: str
 
 
 type RyseConfigEntry = ConfigEntry[RyseRuntimeData]
@@ -71,7 +88,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: RyseConfigEntry) -> bool
     except UpdateFailed as err:
         raise ConfigEntryNotReady(str(err)) from err
 
-    entry.runtime_data = RyseRuntimeData(coordinator=coordinator, bridge=bridge)
+    device = coordinator.device
+    assert device is not None  # set by the successful first refresh  # noqa: S101
+    connections = (
+        {(dr.CONNECTION_NETWORK_MAC, dr.format_mac(device.mac))}
+        if device.mac
+        else set()
+    )
+    bridge_device = dr.async_get(hass).async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, entry.unique_id or device.id)},
+        connections=connections,
+        manufacturer="RYSE",
+        model="SmartBridge",
+        name=device.name,
+        sw_version=device.fw_version,
+        hw_version=device.hw_version,
+        configuration_url=f"http://{entry.data[CONF_HOST]}",
+    )
+
+    entry.runtime_data = RyseRuntimeData(
+        coordinator=coordinator,
+        bridge=bridge,
+        bridge_device_id=bridge_device.id,
+    )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 

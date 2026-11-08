@@ -11,11 +11,16 @@ servers, and it keeps working if the internet is down.
 ## Features
 
 - Each shade appears as a `cover` entity with **open**, **close**, and
-  **set position** (0–100, where 100 = fully open).
-- Live position, online state and battery level, polled from the bridge.
-- One battery sensor per shade that reports a battery level.
+  **set position** (0-100, where 100 = fully open).
+- **Speed** (`number`, 0-100%): how fast the shade's motor moves, on the same
+  scale as the RYSE app.
+- **Obstacle detection** (`switch`): stops a shade when it meets resistance.
+- **Battery** (`sensor`, %) and **Power source** (`sensor`: battery, AC adapter
+  or USB charger) per shade.
+- The bridge and each shade are separate devices, with firmware and hardware
+  versions shown; shades hang off the bridge.
 - One config entry per bridge; all shades on that bridge are added automatically.
-- Pure local HTTP — works without the RYSE cloud.
+- Pure local HTTP - works without the RYSE cloud.
 
 ## Requirements
 
@@ -41,25 +46,40 @@ servers, and it keeps working if the internet is down.
 
 ## How it works
 
-The integration uses the bridge's local API:
+The integration uses the bridge's local API through the
+[`pyryse`](https://pypi.org/project/pyryse/) library, which documents the API in
+full ([`PROTOCOL.md`](https://github.com/johnnyxmas/pyryse/blob/main/docs/PROTOCOL.md)):
 
-- `GET /lua/device` — enumerates shades (id, name, position, battery, online).
-- `GET  /lua/device/<dvc_id>/gear/<gear_id>/position` — one shade's position.
-- `POST /lua/device/<dvc_id>/gear/<gear_id>/position` with body `{"position": 0-100}` — move a shade.
+- `GET /lua/device/<dvc_id>` - the bridge and every shade (position, battery,
+  speed, obstacle detection, power type, firmware).
+- `POST /lua/device/<dvc_id>/gear/<gear_id>/position` with `{"position": 0-100}` -
+  move a shade.
+- `GET`/`POST .../gear/<gear_id>/speed` and `.../obstacle_detection` - the
+  per-shade settings.
 
-Positions use Home Assistant's convention: **100 = open, 0 = closed**.
+Home Assistant's convention is **100 = open, 0 = closed**; the bridge uses the
+opposite, and the integration converts. Speed is stored by the bridge as 40-100;
+the integration shows the app's 0-100% (`app % = (bridge - 40) / 60 * 100`).
 
 ## Limitations
 
 - **Polling.** Position/battery refresh on an interval (default 20 s). A move
   triggers an immediate refresh, but the motor takes several seconds to settle.
 - **No tilt / no stop.** The bridge API exposes absolute position only.
-- **Speed and obstacle detection are not in the integration yet.** The bridge
-  API supports both per shade, but neither the integration nor `pyryse` wraps
-  them. Speed is accepted only in the bridge range 40-100, which the app shows
-  as 0-100%.
 - **Routines are not available.** The app's routines (scenes) don't have a known
   local API, so the integration cannot run them.
+- **Settings are slow to apply.** After you change speed or obstacle detection,
+  the bridge takes a few seconds to apply it. The controls keep showing the
+  value you set for up to 30 seconds so they don't jump back while the bridge
+  catches up.
+- **Turning obstacle detection off removes a safety feature.** The shade will no
+  longer stop when it meets resistance.
+- **Not every speed percentage is reachable.** The bridge has 61 speed values
+  for the app's 101 percentages, so a few percentages read back one lower than
+  you set (for example 2% reads as 1%), the same as in the app.
+- **Power source is inferred.** RYSE doesn't document it; the mapping (battery,
+  AC adapter, USB charger) comes from watching one shade's reading change as its
+  power source was swapped.
 - **Offline shades** show as unavailable until they rejoin the bridge.
 - **One local connection.** Keep the RYSE phone app closed if you see conflicts.
 - Tested against SmartShade firmware `5.3.2` on a 2023-era SmartBridge. Other

@@ -10,3 +10,8 @@ SCAN_INTERVAL_SECONDS = 20
 
 # Request timeout (seconds).
 REQUEST_TIMEOUT = 10
+
+# The bridge takes a few seconds to apply a setting. After a write, the speed
+# and obstacle-detection entities show the value just written for up to this
+# many seconds, until the bridge reports it, instead of snapping back.
+PENDING_TIMEOUT = 30

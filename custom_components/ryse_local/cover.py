@@ -60,12 +60,15 @@ class RyseShade(CoordinatorEntity[RyseCoordinator], CoverEntity):
         super().__init__(coordinator)
         self._gear_id = gear_id
         self._attr_unique_id = f"{entry.unique_id}_{gear_id}"
+        gear = self._gear
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, gear_id)},
-            name=self._gear.name if self._gear else gear_id,
+            name=gear.name if gear else gear_id,
             manufacturer="RYSE",
             model="SmartShade",
-            via_device=(DOMAIN, entry.unique_id or "bridge"),
+            sw_version=gear.fw_version if gear else None,
+            hw_version=gear.hw_version if gear else None,
+            via_device_id=entry.runtime_data.bridge_device_id,
         )
 
     @property
