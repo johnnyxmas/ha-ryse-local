@@ -12,7 +12,8 @@ servers, and it keeps working if the internet is down.
 
 - Each shade appears as a `cover` entity with **open**, **close**, and
   **set position** (0–100, where 100 = fully open).
-- Live position, battery level and online state, polled from the bridge.
+- Live position, online state and battery level, polled from the bridge.
+- One battery sensor per shade that reports a battery level.
 - One config entry per bridge; all shades on that bridge are added automatically.
 - Pure local HTTP — works without the RYSE cloud.
 
@@ -53,6 +54,12 @@ Positions use Home Assistant's convention: **100 = open, 0 = closed**.
 - **Polling.** Position/battery refresh on an interval (default 20 s). A move
   triggers an immediate refresh, but the motor takes several seconds to settle.
 - **No tilt / no stop.** The bridge API exposes absolute position only.
+- **Speed and obstacle detection are not exposed yet.** The bridge stores a
+  per-shade speed and an on/off obstacle-detection setting, but the integration
+  doesn't surface either. Speed is accepted only in the bridge range 40-100,
+  which the app shows as 0-100%.
+- **Routines are not available.** The app's routines (scenes) don't have a known
+  local API, so the integration cannot run them.
 - **Offline shades** show as unavailable until they rejoin the bridge.
 - **One local connection.** Keep the RYSE phone app closed if you see conflicts.
 - Tested against SmartShade firmware `5.3.2` on a 2023-era SmartBridge. Other
