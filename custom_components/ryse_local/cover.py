@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from pyryse import Gear
+
 from homeassistant.components.cover import (
     ATTR_POSITION,
     CoverDeviceClass,
@@ -15,7 +17,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import RyseConfigEntry, RyseCoordinator, RyseGear
+from . import RyseConfigEntry, RyseCoordinator
 from .const import DOMAIN
 
 
@@ -27,8 +29,7 @@ async def async_setup_entry(
     """Set up shades from a config entry."""
     coordinator = entry.runtime_data.coordinator
     async_add_entities(
-        RyseShade(coordinator, entry, gear_id)
-        for gear_id in coordinator.data
+        RyseShade(coordinator, entry, gear_id) for gear_id in coordinator.data
     )
 
 
@@ -36,10 +37,9 @@ class RyseShade(CoordinatorEntity[RyseCoordinator], CoverEntity):
     """A single RYSE shade.
 
     Position conventions are INVERTED between the two systems:
-      * Bridge: 0 = fully open, 100 = fully closed.
+      * pyryse/bridge: 0 = fully open, 100 = fully closed.
       * Home Assistant cover: 100 = fully open, 0 = closed.
     So HA position = 100 - bridge position, and vice versa.
-    (Confirmed against physical shades 2026-11-07: open shades report 0.)
     """
 
     _attr_has_entity_name = True
@@ -62,14 +62,14 @@ class RyseShade(CoordinatorEntity[RyseCoordinator], CoverEntity):
         self._attr_unique_id = f"{entry.unique_id}_{gear_id}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, gear_id)},
-            name=self._gear.name,
+            name=self._gear.name if self._gear else gear_id,
             manufacturer="RYSE",
             model="SmartShade",
             via_device=(DOMAIN, entry.unique_id or "bridge"),
         )
 
     @property
-    def _gear(self) -> RyseGear | None:
+    def _gear(self) -> Gear | None:
         return self.coordinator.data.get(self._gear_id)
 
     @property
@@ -101,8 +101,9 @@ class RyseShade(CoordinatorEntity[RyseCoordinator], CoverEntity):
     async def _set_ha(self, ha_position: int) -> None:
         """Set from a Home Assistant position (100=open); bridge wants the inverse."""
         bridge_position = 100 - max(0, min(100, ha_position))
-        await self.coordinator.client.async_set_position(self._gear_id, bridge_position)
-        # The motor takes several seconds; refresh so the UI tracks it.
+        await self.coordinator.bridge.async_set_position(
+            self._gear_id, bridge_position
+        )
         await self.coordinator.async_request_refresh()
 
     @callback

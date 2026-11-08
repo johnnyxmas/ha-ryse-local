@@ -5,11 +5,11 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
+from pyryse import RyseBridge, RyseError
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from . import RyseApiError, RyseClient
 from .const import CONF_HOST, CONF_SERIAL, DOMAIN
 
 
@@ -25,18 +25,18 @@ class RyseConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             host = user_input[CONF_HOST].strip()
             serial = (user_input.get(CONF_SERIAL) or "").strip() or None
-            session = async_get_clientsession(self.hass)
-            client = RyseClient(session, host=host, serial=serial)
+            bridge = RyseBridge(
+                host, async_get_clientsession(self.hass), serial=serial
+            )
             try:
-                device = await client.async_get_device()
-            except RyseApiError:
+                device = await bridge.async_get_device()
+            except RyseError:
                 errors["base"] = "cannot_connect"
             else:
-                dvc_id = device.get("dvc_id")
-                await self.async_set_unique_id(dvc_id)
+                await self.async_set_unique_id(device.id)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title=device.get("dvc_name", "RYSE SmartBridge"),
+                    title=device.name,
                     data={CONF_HOST: host, CONF_SERIAL: serial},
                 )
 
