@@ -54,10 +54,10 @@ Positions use Home Assistant's convention: **100 = open, 0 = closed**.
 - **Polling.** Position/battery refresh on an interval (default 20 s). A move
   triggers an immediate refresh, but the motor takes several seconds to settle.
 - **No tilt / no stop.** The bridge API exposes absolute position only.
-- **Speed and obstacle detection are not exposed yet.** The bridge stores a
-  per-shade speed and an on/off obstacle-detection setting, but the integration
-  doesn't surface either. Speed is accepted only in the bridge range 40-100,
-  which the app shows as 0-100%.
+- **Speed and obstacle detection are not in the integration yet.** The bridge
+  API supports both per shade, but neither the integration nor `pyryse` wraps
+  them. Speed is accepted only in the bridge range 40-100, which the app shows
+  as 0-100%.
 - **Routines are not available.** The app's routines (scenes) don't have a known
   local API, so the integration cannot run them.
 - **Offline shades** show as unavailable until they rejoin the bridge.
