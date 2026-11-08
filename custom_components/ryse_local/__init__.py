@@ -23,7 +23,7 @@ from .const import CONF_HOST, CONF_SERIAL, REQUEST_TIMEOUT, SCAN_INTERVAL_SECOND
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.COVER]
+PLATFORMS: list[Platform] = [Platform.COVER, Platform.SENSOR]
 
 
 class RyseCoordinator(DataUpdateCoordinator[dict[str, Gear]]):
