@@ -28,14 +28,23 @@ servers, and it keeps working if the internet is down.
   reserved IP address (recommended, since the integration connects by IP).
 - The shades already paired to the bridge using the RYSE app.
 
-## Installation (HACS)
+## Installation
 
-1. In HACS → **Integrations** → ⋮ → **Custom repositories**, add
-   `https://github.com/johnnyxmas/ha-ryse-local` as category **Integration**.
-2. Install **RYSE SmartBridge (local)** and restart Home Assistant.
+### From HACS (recommended)
+
+1. In HACS → **Integrations**, search for **RYSE SmartBridge (local)** and download it.
+2. Restart Home Assistant.
 3. **Settings → Devices & Services → Add Integration → RYSE SmartBridge (local)**.
 4. Enter the bridge's IP address. Leave **Serial** blank unless your bridge has
    local security enabled (see below).
+
+### Fallback: custom repository
+
+If the integration isn't yet in your HACS catalog, add it manually:
+
+1. In HACS → **Integrations** → ⋮ → **Custom repositories**, add
+   `https://github.com/johnnyxmas/ha-ryse-local` as category **Integration**.
+2. Then follow steps 2–4 above.
 
 ## Configuration
 
